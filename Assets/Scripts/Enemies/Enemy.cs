@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
@@ -7,7 +8,7 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField] protected float moveSpeed = 2f;
     [SerializeField] protected int contactDamage = 1;
     [SerializeField] protected float attackInterval = 1f;
-    [SerializeField] protected int scrapReward = 5; 
+    [SerializeField] protected int scrapReward = 5;
 
     protected Rigidbody2D Rb { get; private set; }
     protected Health SelfHealth { get; private set; }
@@ -15,31 +16,34 @@ public abstract class Enemy : MonoBehaviour
 
     public int ScrapReward => scrapReward;
 
+    public event Action<Enemy> OnRemoved;
+
     private float _nextAttackTime;
+    private bool _removed;
 
     protected virtual void Awake()
     {
         Rb = GetComponent<Rigidbody2D>();
         SelfHealth = GetComponent<Health>();
-        SelfHealth.OnDied += Die;
+        SelfHealth.OnDied += HandleDied;
     }
 
     protected virtual void Start()
     {
-
-        GameObject core = GameObject.FindWithTag("Core");
+        CoreObjective core = GameManager.Instance.Core;
         if (core != null) Target = core.transform;
     }
 
     protected virtual void OnDestroy()
     {
-        if (SelfHealth != null) SelfHealth.OnDied -= Die;
+        if (SelfHealth != null) SelfHealth.OnDied -= HandleDied;
     }
 
     protected virtual void FixedUpdate()
     {
         Rb.SetVelocity(Target != null ? GetDesiredVelocity() : Vector2.zero);
     }
+
     protected virtual Vector2 GetDesiredVelocity()
     {
         Vector2 toTarget = (Vector2)Target.position - Rb.position;
@@ -63,8 +67,20 @@ public abstract class Enemy : MonoBehaviour
 
     protected abstract void Attack(Health target);
 
-    protected virtual void Die()
+    protected void Remove(bool giveReward)
     {
+        if (_removed) return;
+        _removed = true;
+
+        if (giveReward && GameManager.HasInstance)
+            GameManager.Instance.AddScrap(scrapReward);
+
+        OnRemoved?.Invoke(this);
         Destroy(gameObject);
+    }
+
+    private void HandleDied()
+    {
+        Remove(true);
     }
 }

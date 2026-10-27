@@ -30,7 +30,14 @@ public class Health : MonoBehaviour
     public void Heal(int amount)
     {
         if (IsDead || amount <= 0) return;
+
         Current = Mathf.Min(maxHealth, Current + amount);
+        OnHealthChanged?.Invoke(Current, maxHealth);
+    }
+
+    public void Revive()
+    {
+        Current = maxHealth;
         OnHealthChanged?.Invoke(Current, maxHealth);
     }
 }

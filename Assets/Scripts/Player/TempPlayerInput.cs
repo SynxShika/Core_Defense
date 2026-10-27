@@ -19,7 +19,8 @@ public class TempPlayerInput : MonoBehaviour
 
         _player.AimAt(_cam.ScreenToWorldPoint(Input.mousePosition));
 
-        if (Input.GetMouseButton(0)) _player.Shoot();   
+        if (Input.GetMouseButton(0)) _player.Shoot();
         if (Input.GetKeyDown(KeyCode.Space)) _player.Dash();
+        if (Input.GetKeyDown(KeyCode.Return)) GameManager.Instance.SkipBuildPhase();
     }
 }

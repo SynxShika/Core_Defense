@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(Health))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
@@ -12,10 +12,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashCooldown = 1f;
 
     [Header("Aim & Shooting")]
-    [SerializeField] private Transform aimPivot; 
-    [SerializeField] private Transform firePoint;  
+    [SerializeField] private Transform aimPivot;
+    [SerializeField] private Transform firePoint;
     [SerializeField] private Bullet bulletPrefab;
-    [SerializeField] private float fireRate = 8f; 
+    [SerializeField] private float fireRate = 8f;
+
+    public Health Health { get; private set; }
 
     private Rigidbody2D _rb;
     private Vector2 _moveDir;
@@ -29,12 +31,17 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
+        Health = GetComponent<Health>();
     }
 
+    private void Start()
+    {
+        GameManager.Instance.RegisterPlayer(this);
+    }
 
     public void Move(Vector2 direction)
     {
-        _moveDir = Vector2.ClampMagnitude(direction, 1f); 
+        _moveDir = Vector2.ClampMagnitude(direction, 1f);
     }
 
     public void AimAt(Vector2 worldPoint)
@@ -46,7 +53,8 @@ public class PlayerController : MonoBehaviour
 
     public void Shoot()
     {
-        if (Time.time < _nextFireTime) return;       
+        if (Time.time < _nextFireTime) return;
+
         _nextFireTime = Time.time + 1f / fireRate;
         Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
     }
@@ -54,11 +62,11 @@ public class PlayerController : MonoBehaviour
     public void Dash()
     {
         if (Time.time < _nextDashTime || _moveDir == Vector2.zero) return;
+
         _dashDir = _moveDir.normalized;
         _dashEndTime = Time.time + dashDuration;
         _nextDashTime = Time.time + dashCooldown;
     }
-
 
     private void FixedUpdate()
     {
