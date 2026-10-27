@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
@@ -14,12 +15,18 @@ public abstract class Enemy : MonoBehaviour
     protected Health SelfHealth { get; private set; }
     protected Transform Target { get; set; }
 
+    public static readonly List<Enemy> Active = new List<Enemy>();
+
     public int ScrapReward => scrapReward;
+    public float MoveSpeed => moveSpeed;
+    public Vector2 Position => Rb.position;
 
     public event Action<Enemy> OnRemoved;
 
     private float _nextAttackTime;
     private bool _removed;
+    private bool _hasSteering;
+    private Vector2 _steeringVelocity;
 
     protected virtual void Awake()
     {
@@ -34,6 +41,23 @@ public abstract class Enemy : MonoBehaviour
         if (core != null) Target = core.transform;
     }
 
+    protected virtual void OnEnable()
+    {
+        Active.Add(this);
+    }
+
+    protected virtual void OnDisable()
+    {
+        Active.Remove(this);
+        _hasSteering = false;
+    }
+
+    public void SetSteeringVelocity(Vector2 velocity)
+    {
+        _steeringVelocity = velocity;
+        _hasSteering = true;
+    }
+
     protected virtual void OnDestroy()
     {
         if (SelfHealth != null) SelfHealth.OnDied -= HandleDied;
@@ -46,6 +70,8 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual Vector2 GetDesiredVelocity()
     {
+        if (_hasSteering) return _steeringVelocity;
+
         Vector2 toTarget = (Vector2)Target.position - Rb.position;
         return toTarget.normalized * moveSpeed;
     }
