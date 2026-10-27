@@ -20,6 +20,7 @@ public class TurretPlacer : MonoBehaviour
     private int _selectedIndex = -1;
 
     public Turret SelectedPrefab => _selectedIndex >= 0 ? turretPrefabs[_selectedIndex] : null;
+    public bool CanBuild => GameManager.Instance.State == GameState.Build;
 
     private void Awake()
     {
@@ -29,10 +30,7 @@ public class TurretPlacer : MonoBehaviour
 
     private void Update()
     {
-        HandleSelectionInput();
-
-        bool canBuild = GameManager.Instance.State == GameState.Build;
-        if (!canBuild || SelectedPrefab == null)
+        if (!CanBuild || SelectedPrefab == null)
         {
             ghost.gameObject.SetActive(false);
             return;
@@ -44,9 +42,6 @@ public class TurretPlacer : MonoBehaviour
         ghost.gameObject.SetActive(true);
         ghost.transform.position = cell;
         ghost.color = valid ? validColor : invalidColor;
-
-        if (valid && Input.GetMouseButtonDown(1))
-            PlaceTurret(SelectedPrefab, cell);
     }
 
     public void SelectTurret(int index)
@@ -60,10 +55,46 @@ public class TurretPlacer : MonoBehaviour
         _selectedIndex = -1;
     }
 
+    public bool TryGetPlacementAtMouse(out Turret prefab, out Vector2 cell)
+    {
+        prefab = SelectedPrefab;
+        cell = GetMouseCell();
+
+        return CanBuild
+            && prefab != null
+            && IsCellBuildable(cell)
+            && GameManager.Instance.Scrap >= prefab.Cost;
+    }
+
+    public Turret GetTurretAtMouse()
+    {
+        if (!CanBuild) return null;
+
+        foreach (Collider2D hit in Physics2D.OverlapBoxAll(GetMouseCell(), occupancyCheckSize, 0f))
+        {
+            Turret turret = hit.GetComponentInParent<Turret>();
+            if (turret != null) return turret;
+        }
+
+        return null;
+    }
+
     public Turret PlaceTurret(Turret prefab, Vector2 cell)
     {
+        if (!IsCellBuildable(cell)) return null;
         if (!GameManager.Instance.TrySpendScrap(prefab.Cost)) return null;
-        return Instantiate(prefab, cell, Quaternion.identity);
+
+        Turret turret = Instantiate(prefab, cell, Quaternion.identity);
+        turret.SourcePrefab = prefab;
+        return turret;
+    }
+
+    public void RemoveTurret(Turret turret, bool refund)
+    {
+        if (turret == null) return;
+
+        if (refund) GameManager.Instance.AddScrap(turret.Cost);
+        turret.Remove();
     }
 
     public bool IsCellBuildable(Vector2 cell)
@@ -77,13 +108,6 @@ public class TurretPlacer : MonoBehaviour
         }
 
         return true;
-    }
-
-    private void HandleSelectionInput()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) SelectTurret(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) SelectTurret(1);
-        if (Input.GetKeyDown(KeyCode.Escape)) ClearSelection();
     }
 
     private Vector2 GetMouseCell()

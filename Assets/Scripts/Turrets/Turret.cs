@@ -17,6 +17,7 @@ public abstract class Turret : MonoBehaviour
 
     public string DisplayName => displayName;
     public int Cost => cost;
+    public Turret SourcePrefab { get; set; }
 
     public event Action<Turret> OnTurretRemoved;
 

@@ -26,6 +26,7 @@ public class GameManager : Singleton<GameManager>
     public int TotalWaves => totalWaves;
     public int Scrap { get; private set; }
     public float BuildTimeRemaining { get; private set; }
+    public bool IsPaused { get; private set; }
     public CoreObjective Core { get; private set; }
     public PlayerController Player { get; private set; }
 
@@ -78,6 +79,14 @@ public class GameManager : Singleton<GameManager>
         return true;
     }
 
+    public void SetPaused(bool paused)
+    {
+        if (State == GameState.Victory || State == GameState.Defeat) return;
+
+        IsPaused = paused;
+        Time.timeScale = paused ? 0f : 1f;
+    }
+
     public void SkipBuildPhase()
     {
         if (State == GameState.Build) SetState(GameState.Defend);
@@ -119,6 +128,7 @@ public class GameManager : Singleton<GameManager>
     private void SetState(GameState newState)
     {
         State = newState;
+        IsPaused = false;
 
         if (newState == GameState.Build)
             BuildTimeRemaining = buildPhaseDuration;
