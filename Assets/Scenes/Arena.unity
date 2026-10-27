@@ -3474,7 +3474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2198884056a271d4884aea816b15eda5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 500
+  maxHealth: 20
 --- !u!61 &1553983658
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3830,11 +3830,11 @@ MonoBehaviour:
     baseCount: 4
     extraPerWave: 2
   - spawner: {fileID: 98051597}
-    firstWave: 2
+    firstWave: 1
     baseCount: 2
     extraPerWave: 1
   - spawner: {fileID: 941031408}
-    firstWave: 4
+    firstWave: 1
     baseCount: 1
     extraPerWave: 0.5
   spawnPoints:
@@ -4068,8 +4068,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalWaves: 10
-  startingScrap: 50
-  buildPhaseDuration: 20
+  startingScrap: 200
+  buildPhaseDuration: 100
   waveClearBonus: 20
   bonusPerWave: 5
   playerRespawnDelay: 3
