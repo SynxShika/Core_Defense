@@ -47,7 +47,7 @@ Gantt Chart:
 
 4. Singleton - GameManager
 
-<img width="1176" height="1434" alt="image" src="https://github.com/user-attachments/assets/7c0a024a-b55c-45d9-bf4a-5a227c58ac6f" />
+<img width="588" height="717" alt="image" src="https://github.com/user-attachments/assets/7c0a024a-b55c-45d9-bf4a-5a227c58ac6f" />
 
 
 How: generic Singleton<T> keeps one persistent instance (DontDestroyOnLoad); GameManager holds the state, wave and scrap.
@@ -57,7 +57,7 @@ Why: the game needs one source of truth that every system can reach.
 Benefit: consistent game flow and restart; the core and player register themselves, and the UI listens to events, so coupling stays low.
 
 5. Factory – Enemy spawners
-<img width="1542" height="1514" alt="image" src="https://github.com/user-attachments/assets/7814499e-1261-4fe8-b315-21f476b1cfdf" />
+<img width="771" height="757" alt="image" src="https://github.com/user-attachments/assets/7814499e-1261-4fe8-b315-21f476b1cfdf" />
 
 How: WaveManager only calls the abstract SpawnEnemy(); each spawner creates its own enemy type.
 
@@ -66,8 +66,8 @@ Why: new enemy types are added without changing the wave code.
 Benefit: waves mix Walkers, Runners and Brutes and are balanced from the Inspector.
 
 6. Command – Undo/redo turret building and key rebinding
-<img width="2320" height="1066" alt="image" src="https://github.com/user-attachments/assets/7e21273d-0161-4993-ba78-c3db4b240650" />
-<img width="1440" height="404" alt="image" src="https://github.com/user-attachments/assets/a9ffd00d-d80f-4d9f-961b-4dd2c0f6ff6d" />
+<img width="1160" height="533" alt="image" src="https://github.com/user-attachments/assets/7e21273d-0161-4993-ba78-c3db4b240650" />
+<img width="720" height="202" alt="image" src="https://github.com/user-attachments/assets/a9ffd00d-d80f-4d9f-961b-4dd2c0f6ff6d" />
 
 How: every key press runs a command object; placing and selling turrets are undoable commands kept in undo/redo stacks.
 
@@ -76,7 +76,7 @@ Why: it separates input from game logic, and each command remembers enough to re
 Benefit: free undo/redo while planning the turret layout, and every key can be rebound (saved between sessions).
 
 7. Plugin – C++ enemy steering (DLL)
-<img width="988" height="1916" alt="image" src="https://github.com/user-attachments/assets/25b316d6-240c-4069-8656-d724c4066232" />
+<img width="494" height="958" alt="image" src="https://github.com/user-attachments/assets/25b316d6-240c-4069-8656-d724c4066232" />
 <img width="321" height="96" alt="image" src="https://github.com/user-attachments/assets/7fc26fde-68cc-474f-ac81-46db60b4b2a6" />
 
 How: SteeringPlugin.dll (C++, extern "C") computes all enemy velocities in one call per physics step; Unity calls it with [DllImport].
