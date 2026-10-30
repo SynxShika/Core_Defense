@@ -18,61 +18,81 @@ Why this scene suits the project: a single global game state (phase, wave, scrap
 Controls
 
 Move - W A S D
+
 Aim - Mouse
+
 Shoot - Left Click (hold)
+
 Dash - Space
+
 Select Gun / Cannon turret - 1 / 2
+
 Place turret / Sell turret - Right Click / X
+
 Cancel selection - Esc
+
 Undo / Redo (build phase) - Z / Y
+
 Start wave early - Enter
+
 Controls menu - Tab
+
 Switch steering backend (C++ / C#) - F2
 
 3. Group Formation
+I completed this project solo as my own producer, splitting the work into small milestones with planned dates, tracking each task from to-do to done, and committing to the repository after every milestone. I covered every role: producer, gameplay, systems, plugin and UI programming, QA, and documentation.
+
+Gantt Chart:
+<img width="2768" height="632" alt="image" src="https://github.com/user-attachments/assets/6d426ca7-31c7-4b33-9e8f-4e07e55b9ff4" />
 
 4. Singleton - GameManager
 
-How it was implemented in my project:
-Singleton<T> is a generic MonoBehaviour base class. A private static _instance holds the only instance, and the public static Instance property returns it, finding it in the scene or creating it if it does not exist yet.
+<img width="1176" height="1434" alt="image" src="https://github.com/user-attachments/assets/7c0a024a-b55c-45d9-bf4a-5a227c58ac6f" />
 
-Awake() keeps the first instance and marks it DontDestroyOnLoad; any duplicate destroys itself.
 
-HasInstance lets scripts check whether the manager exists without accidentally creating one.
+How: generic Singleton<T> keeps one persistent instance (DontDestroyOnLoad); GameManager holds the state, wave and scrap.
 
-An _isQuitting guard stops a new GameManager from being created during application shutdown.
+Why: the game needs one source of truth that every system can reach.
 
-GameManager:
-Singleton<GameManager> owns the game state (Build, Defend, Victory, Defeat), the wave number, the scrap economy, the build timer, pausing, player respawn and restarting.
-
-Scene objects register themselves: CoreObjective and PlayerController call RegisterCore / RegisterPlayer. Because the manager survives scene reloads, this keeps it pointed at the current scene's objects instead of destroyed ones.
-
-The manager raises OnStateChanged, OnScrapChanged and OnWaveChanged events; the HUD, WaveManager and CommandInvoker subscribe to them instead of polling.
-
-Why:
-
-The game has exactly one source of truth for the phase, wave and scrap, and almost every system needs it: enemies add scrap, turrets spend it, the wave system completes waves, and the HUD displays everything. A Singleton gives all of them one controlled access point and guarantees there can never be two conflicting game states. I chose self-registration and events to limit the usual Singleton drawback of tight coupling: the GameManager never searches for objects or calls the UI directly.
-
-Benefits:
-
-Phases, waves, victory/defeat, respawning and restarting are all coordinated in one place, so the game flow is consistent and easy to debug. Restart works by reloading the scene while the manager resets its own state.
+Benefit: consistent game flow and restart; the core and player register themselves, and the UI listens to events, so coupling stays low.
 
 5. Factory – Enemy spawners
+<img width="1542" height="1514" alt="image" src="https://github.com/user-attachments/assets/7814499e-1261-4fe8-b315-21f476b1cfdf" />
 
-How it was implemented in my project:
+How: WaveManager only calls the abstract SpawnEnemy(); each spawner creates its own enemy type.
 
-Abstract product: Enemy (abstract Attack(Health target))
+Why: new enemy types are added without changing the wave code.
 
-Concrete products: Walker (contact damage), Runner (fast, explodes on contact), Brute (tanky, triple damage to turrets)
+Benefit: waves mix Walkers, Runners and Brutes and are balanced from the Inspector.
 
-Abstract creator: EnemySpawner with abstract Enemy SpawnEnemy(Vector2 position)
+6. Command – Undo/redo turret building and key rebinding
+<img width="2320" height="1066" alt="image" src="https://github.com/user-attachments/assets/7e21273d-0161-4993-ba78-c3db4b240650" />
+<img width="1440" height="404" alt="image" src="https://github.com/user-attachments/assets/a9ffd00d-d80f-4d9f-961b-4dd2c0f6ff6d" />
 
-Concrete creators; WalkerSpawner, RunnerSpawner, BruteSpawner (each instantiates its own prefab)
+How: every key press runs a command object; placing and selling turrets are undoable commands kept in undo/redo stacks.
 
-Client: WaveManager
+Why: it separates input from game logic, and each command remembers enough to reverse itself.
 
-- Enemy holds all shared behaviour: moving toward the core, attacking whatever it touches on a timer, rewarding scrap and reporting its removal through OnRemoved.
-- WaveManager holds a data-driven list of wave entries (spawner, first wave, base count, extra per wave) set in the Inspector. Each wave it builds a shuffled spawn queue and calls spawner.SpawnEnemy(point) at random edge spawn points. It only knows the abstract EnemySpawner and Enemy types.
-- The wave is complete when spawning has finished and every enemy has been removed; the manager then calls GameManager.Instance.CompleteWave().
-6. 
+Benefit: free undo/redo while planning the turret layout, and every key can be rebound (saved between sessions).
 
+7. Plugin – C++ enemy steering (DLL)
+<img width="988" height="1916" alt="image" src="https://github.com/user-attachments/assets/25b316d6-240c-4069-8656-d724c4066232" />
+<img width="321" height="96" alt="image" src="https://github.com/user-attachments/assets/7fc26fde-68cc-474f-ac81-46db60b4b2a6" />
+
+How: SteeringPlugin.dll (C++, extern "C") computes all enemy velocities in one call per physics step; Unity calls it with [DllImport].
+
+Why: comparing every enemy with every other one is heavy math that suits native code; a C# fallback keeps the game running if the DLL is missing.
+
+Benefit: enemies spread out and surround the core instead of clumping, so every side must be defended.
+
+8. How to Run
+
+Download the zip from the latest Release, extract it, and run the .exe (Windows 10+, 64-bit).
+
+9. Contribution Statement
+
+Dylan Quan (100982485) – 100%. I declare that I am the sole member of this project and responsible for all submitted work.
+
+10. Credits
+- Unity 6 and TextMeshPro – Unity Technologies
+- INFR 3110U Lectures 03 and 06 (Singleton, Factory, Command, native plugins)
