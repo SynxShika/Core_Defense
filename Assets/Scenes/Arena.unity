@@ -2302,11 +2302,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5816352855236595894, guid: 562eca8a681ac0a49a49c7be21301c15, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.13
+      value: 27.33
       objectReference: {fileID: 0}
     - target: {fileID: 5816352855236595894, guid: 562eca8a681ac0a49a49c7be21301c15, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9.52
+      value: 11.89
       objectReference: {fileID: 0}
     - target: {fileID: 5816352855236595894, guid: 562eca8a681ac0a49a49c7be21301c15, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3830,11 +3830,11 @@ MonoBehaviour:
     baseCount: 4
     extraPerWave: 2
   - spawner: {fileID: 98051597}
-    firstWave: 1
+    firstWave: 2
     baseCount: 2
     extraPerWave: 1
   - spawner: {fileID: 941031408}
-    firstWave: 1
+    firstWave: 4
     baseCount: 1
     extraPerWave: 0.5
   spawnPoints:
@@ -4068,8 +4068,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalWaves: 10
-  startingScrap: 200
-  buildPhaseDuration: 100
+  startingScrap: 100
+  buildPhaseDuration: 20
   waveClearBonus: 20
   bonusPerWave: 5
   playerRespawnDelay: 3
